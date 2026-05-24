@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-eva-gold: #C5A258;
+  --color-eva-gold-light: #D4B978;
+  --color-eva-gold-dark: #A68A3E;
+  --color-eva-charcoal: #1A1A1A;
+  --color-eva-offwhite: #FAF8F5;
+  --color-eva-cream: #F0EBE3;
+  --color-eva-stone: #C8BFB2;
+  --color-eva-warm-gray: #8A8279;
+  --color-eva-deep: #2C2620;
+  --color-eva-accent: #7B6B4A;
+  --color-eva-success: #4A7B5E;
+  --color-eva-pending: #C5A258;
+  --color-eva-alert: #A65B4A;
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F0EBE3;
+}
+::-webkit-scrollbar-thumb {
+  background: #C8BFB2;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #C5A258;
+}
+
+body {
+  font-family: var(--font-body), "Segoe UI", sans-serif;
+}

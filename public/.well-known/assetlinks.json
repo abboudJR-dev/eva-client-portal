@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "ae.evainteriors.portal",
+      "sha256_cert_fingerprints": [
+        "61:04:D9:7B:8C:49:4F:CB:25:03:CC:1D:EA:9E:66:87:EA:6E:04:D1:22:AC:F7:7D:32:A3:94:93:73:A1:C3:71"
+      ]
+    }
+  }
+]

@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import ClientNav from "@/components/layout/client-nav";
+import GoldGrad from "@/components/gold-grad";
+import RevealManager from "@/components/reveal-manager";
 
 export default async function ClientLayout({
   children,
@@ -13,9 +15,11 @@ export default async function ClientLayout({
   if (session.user.role === "ADMIN") redirect("/admin");
 
   return (
-    <div className="min-h-screen bg-[#FAF8F5]">
+    <div className="portal-shell">
+      <GoldGrad />
       <ClientNav user={session.user} />
-      <main className="pt-20 pb-12">{children}</main>
+      <main>{children}</main>
+      <RevealManager />
     </div>
   );
 }

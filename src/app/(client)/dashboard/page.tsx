@@ -20,50 +20,54 @@ export default async function DashboardPage() {
 
   if (!project) {
     return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="text-center py-20">
-          <h1 className="font-[family-name:var(--font-display)] text-2xl text-[#1A1A1A] mb-4">
-            Welcome to EVA Interiors
-          </h1>
-          <p className="text-[#8A8279]">
-            Your project is being set up. Your Relationship Manager will notify you once everything is ready.
-          </p>
-        </div>
+      <div className="wrap">
+        <section className="page">
+          <div className="doc-empty" style={{ marginTop: 24 }}>
+            <h3>Welcome to EVA Interiors</h3>
+            <p>
+              Your project is being set up. Your Relationship Manager will notify
+              you once everything is ready.
+            </p>
+          </div>
+        </section>
       </div>
     );
   }
 
   const totalSteps = project.phases.reduce((acc, p) => acc + p.steps.length, 0);
-  const completedSteps = project.phases.reduce((acc, p) => acc + p.steps.filter((s) => s.isCompleted).length, 0);
-  const pendingApprovals = project.approvals.filter((a) => a.status === "PENDING").length;
+  const completedSteps = project.phases.reduce(
+    (acc, p) => acc + p.steps.filter((s) => s.isCompleted).length,
+    0,
+  );
+  const pendingApprovals = project.approvals.filter(
+    (a) => a.status === "PENDING",
+  ).length;
+  const currentPhase =
+    project.phases.find((p) => p.status === "IN_PROGRESS")?.name ||
+    "Getting Started";
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-10">
-        <p className="text-xs tracking-widest uppercase text-[#C5A258] font-semibold mb-1">Your Design Journey</p>
-        <h1 className="font-[family-name:var(--font-display)] text-3xl text-[#1A1A1A] mb-2">
-          {project.name}
-        </h1>
-        {project.manager && (
-          <p className="text-sm text-[#8A8279]">
-            Relationship Manager: <span className="text-[#1A1A1A] font-medium">{project.manager.name}</span>
+    <div className="wrap">
+      <section className="page">
+        <div className="page-head reveal">
+          <span className="eyebrow">Your Design Journey</span>
+          <h1>{project.name}</h1>
+          <p className="meta">
+            Relationship Manager:{" "}
+            <b>{project.manager?.name ?? "EVA Sales Team"}</b>
           </p>
-        )}
-      </div>
+        </div>
 
-      <ProgressOverview
-        totalSteps={totalSteps}
-        completedSteps={completedSteps}
-        pendingApprovals={pendingApprovals}
-        currentPhase={project.phases.find((p) => p.status === "IN_PROGRESS")?.name || "Getting Started"}
-      />
+        <ProgressOverview
+          totalSteps={totalSteps}
+          completedSteps={completedSteps}
+          pendingApprovals={pendingApprovals}
+          currentPhase={currentPhase}
+        />
 
-      <div className="mt-12">
-        <h2 className="font-[family-name:var(--font-display)] text-xl mb-6 text-[#1A1A1A]">
-          Project Phases
-        </h2>
+        <h2 className="section-title reveal">Project Phases</h2>
         <PhaseTimeline phases={project.phases} />
-      </div>
+      </section>
     </div>
   );
 }

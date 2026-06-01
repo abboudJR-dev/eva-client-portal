@@ -1,7 +1,43 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { redirect } from "next/navigation";
-import { FileText, ExternalLink } from "lucide-react";
+
+function FileIcon({ strokeWidth = 1.6 }: { strokeWidth?: number }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={strokeWidth}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z" />
+      <path d="M14 3v5h5" />
+    </svg>
+  );
+}
+
+function formatDate(d: Date | null | undefined): string | null {
+  if (!d) return null;
+  try {
+    return new Date(d).toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  } catch {
+    return null;
+  }
+}
+
+function fileExt(url: string | null, name: string): string {
+  const src = url || name || "";
+  const m = src.match(/\.([a-z0-9]{1,5})(?:\?|#|$)/i);
+  if (m) return m[1].toUpperCase();
+  return url ? "LINK" : "DOC";
+}
 
 export default async function DocumentsPage() {
   const session = await auth();
@@ -15,74 +51,98 @@ export default async function DocumentsPage() {
 
   if (!project) {
     return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
-        <p className="text-[#8A8279]">No project found.</p>
+      <div className="wrap">
+        <section className="page">
+          <div className="doc-empty" style={{ marginTop: 24 }}>
+            <h3>No project found</h3>
+            <p>
+              Your project is being set up. Documents will appear here once
+              everything is ready.
+            </p>
+          </div>
+        </section>
       </div>
     );
   }
 
-  const grouped = project.documents.reduce<Record<string, typeof project.documents>>((acc, doc) => {
-    const phase = doc.phase || "General";
-    if (!acc[phase]) acc[phase] = [];
-    acc[phase].push(doc);
-    return acc;
-  }, {});
+  const docs = project.documents;
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8">
-        <p className="text-xs tracking-widest uppercase text-[#C5A258] font-semibold mb-1">Documentation</p>
-        <h1 className="font-[family-name:var(--font-display)] text-3xl text-[#1A1A1A]">
-          Your Documents
-        </h1>
-        <p className="text-sm text-[#8A8279] mt-2">
-          All documents, files, and links related to your design journey.
-        </p>
-      </div>
+    <div className="wrap">
+      <section className="page">
+        <div className="page-head reveal">
+          <span className="eyebrow">Documentation</span>
+          <h1>Your Documents</h1>
+          <p className="lede">
+            All contracts, files, and links related to your design journey —
+            gathered as your project progresses.
+          </p>
+        </div>
 
-      {Object.keys(grouped).length === 0 ? (
-        <div className="text-center py-16 bg-white border border-[#C8BFB2]/30">
-          <FileText size={32} className="mx-auto text-[#C8BFB2] mb-3" />
-          <p className="text-[#8A8279]">Documents will appear here as your project progresses.</p>
-        </div>
-      ) : (
-        <div className="space-y-8">
-          {Object.entries(grouped).map(([phase, docs]) => (
-            <div key={phase}>
-              <h2 className="text-xs tracking-widest uppercase text-[#C5A258] font-bold mb-3 pb-2 border-b border-[#C8BFB2]/20">
-                {phase}
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {docs.map((doc) => (
-                  <div key={doc.id} className="bg-white border border-[#C8BFB2]/30 p-4 flex items-start gap-3 hover:shadow-sm hover:border-[#C5A258]/30 transition-all">
-                    <div className="w-10 h-10 flex-shrink-0 bg-[#F0EBE3] flex items-center justify-center">
-                      <FileText size={18} className="text-[#C5A258]" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-[family-name:var(--font-display)] text-sm font-medium text-[#1A1A1A] truncate">
-                        {doc.name}
-                      </h3>
-                      {doc.description && (
-                        <p className="text-xs text-[#8A8279] mt-0.5 line-clamp-2">{doc.description}</p>
-                      )}
-                      {doc.url && (
-                        <a
-                          href={doc.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 mt-2 text-xs text-[#C5A258] hover:text-[#A68A3E] font-medium"
-                        >
-                          Open Document <ExternalLink size={10} />
-                        </a>
-                      )}
-                    </div>
+        {docs.length > 0 && (
+          <div className="doc-grid">
+            {docs.map((doc) => {
+              const sub =
+                [doc.phase, formatDate(doc.uploadedAt)]
+                  .filter(Boolean)
+                  .join(" · ") || "Document";
+              const inner = (
+                <>
+                  <div className="ft">
+                    <FileIcon />
+                    <span className="ext">{fileExt(doc.url, doc.name)}</span>
                   </div>
-                ))}
-              </div>
-            </div>
-          ))}
+                  <div>
+                    <h4>{doc.name}</h4>
+                    <div className="sub">{sub}</div>
+                  </div>
+                </>
+              );
+              return doc.url ? (
+                <a
+                  key={doc.id}
+                  className="doc-card reveal spotlight"
+                  href={doc.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {inner}
+                </a>
+              ) : (
+                <div key={doc.id} className="doc-card reveal spotlight">
+                  {inner}
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        <div
+          className="doc-empty reveal"
+          style={{ marginTop: docs.length > 0 ? 18 : 24 }}
+        >
+          <div className="ic">
+            <FileIcon strokeWidth={1.5} />
+          </div>
+          {docs.length > 0 ? (
+            <>
+              <h3>More arrives with every phase</h3>
+              <p>
+                Moodboards, 3D renders, and 2D drawing packages will appear here
+                as your project advances through each stage.
+              </p>
+            </>
+          ) : (
+            <>
+              <h3>Your documents will gather here</h3>
+              <p>
+                Contracts, moodboards, renders, and drawing packages will appear
+                here as your project advances through each stage.
+              </p>
+            </>
+          )}
         </div>
-      )}
+      </section>
     </div>
   );
 }
